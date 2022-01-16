@@ -1,18 +1,3 @@
-.App {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  height: 100vh;
-  align-items: center;
-}
-
-.App img {
-  position: absolute;
-  z-index: 10;
-  height: 300px;
-  pointer-events: none;
-}
-
 .box {
   width: 250px;
   height: 250px;

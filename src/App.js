@@ -9,29 +9,14 @@ gsap.registerPlugin(Draggable)
 function App() {
   const dragInstance = useRef(null)
   const boxRef = useRef(null)
-  const [buttonText, setButtonText] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [pokeImage, setPokeImage] = useState("")
 
-  let pokeList = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(() => {
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${Math.round(
-      400 * Math.random()
-    )}.png`
-  })
-
-  const [pokeImage, setPokeImage] = useState(pokeList[0])
-  console.log(pokeImage)
-
-  const createDraggableComponent = () => {
+  const createDraggableComponent = (pokeList) => {
     dragInstance.current = Draggable.create(boxRef.current, {
       type: "rotation",
       onDrag() {
-        setButtonText(Math.random())
         setPokeImage(pokeList[this.rotation / 45])
-      },
-      onDragEnd() {
-        setButtonText("Humongousaur!")
-      },
-      onDragStart() {
-        setButtonText("Its Hero Time!")
       },
       liveSnap: function (value) {
         return Math.round(value / 45) * 45
@@ -43,15 +28,47 @@ function App() {
     })
   }
 
+  const cacheImages = async (srcArray) => {
+    const promises = await srcArray.map((src) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+
+        img.src = src
+        img.onload = resolve()
+        img.onerror = reject()
+      })
+    })
+
+    await Promise.all(promises)
+    setIsLoading(false)
+    createDraggableComponent(srcArray)
+  }
+
   useEffect(() => {
-    createDraggableComponent()
+    let pokeList = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(() => {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${Math.round(
+        400 * Math.random()
+      )}.png`
+    })
+    setPokeImage(pokeList[0])
+    cacheImages(pokeList)
   }, [])
 
   return (
-    <div className="App">
-      <Omnitrix ref={boxRef} className="Onmitrix" />
-      <img src={pokeImage} alt="pokemon"></img>
-      <button className="box"></button>
+    <div className="App flex relative justify-center h-screen items-center">
+      {isLoading ? (
+        <h1>Loading</h1>
+      ) : (
+        <>
+          <Omnitrix ref={boxRef} />
+          <img
+            src={pokeImage}
+            className="absolute z-10 h-60 pointer-events-none"
+            alt="pokemon"
+          ></img>
+          <button className="box"></button>
+        </>
+      )}
     </div>
   )
 }
