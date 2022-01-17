@@ -52,6 +52,7 @@ function App() {
     })
     setPokeImage(pokeList[0])
     cacheImages(pokeList)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
