@@ -3,6 +3,7 @@ import { gsap } from "gsap"
 import { Draggable } from "gsap/Draggable"
 import { useEffect, useRef, useState } from "react"
 import { ReactComponent as Omnitrix } from "./images/Omnitrix.svg"
+import Loader from "./components/Loader"
 
 gsap.registerPlugin(Draggable)
 
@@ -11,6 +12,8 @@ function App() {
   const boxRef = useRef(null)
   const [isLoading, setIsLoading] = useState(true)
   const [pokeImage, setPokeImage] = useState("")
+
+  const gsapRef = useRef()
 
   const createDraggableComponent = (pokeList) => {
     dragInstance.current = Draggable.create(boxRef.current, {
@@ -28,6 +31,15 @@ function App() {
     })
   }
 
+  const toggleLoading = (srcArray) => {
+    if (!gsapRef.current.isActive()) {
+      setIsLoading(false)
+      createDraggableComponent(srcArray)
+    } else {
+      setTimeout(() => toggleLoading(srcArray), 500)
+    }
+  }
+
   const cacheImages = async (srcArray) => {
     const promises = await srcArray.map((src) => {
       return new Promise((resolve, reject) => {
@@ -40,8 +52,7 @@ function App() {
     })
 
     await Promise.all(promises)
-    setIsLoading(false)
-    createDraggableComponent(srcArray)
+    toggleLoading(srcArray)
   }
 
   useEffect(() => {
@@ -58,7 +69,7 @@ function App() {
   return (
     <div className="App flex relative justify-center h-screen items-center">
       {isLoading ? (
-        <h1>Loading</h1>
+        <Loader gsapRef={gsapRef} />
       ) : (
         <>
           <Omnitrix ref={boxRef} />
